@@ -1,0 +1,16 @@
+SELECT
+	date(date_add(m.date_registered_utc, interval 7 hour)) AS member_register_date_wib,
+    count(*) AS total_member,
+    sum(m.is_verified = 1) AS verified_member,
+    sum(m.is_verified = 1 AND mp.province="Jawa Tengah") AS verified_member_jawa_tengah,
+    sum(m.is_verified = 1 AND mp.city="Kota Medan") AS verified_member_kota_medan,
+    sum(m.is_reseller = 0) AS non_reseller_member,
+    round(avg(m.points),2) AS avg_points,
+    round(avg(timestampdiff(year,mp.date_of_birth,curdate())),3) AS avg_age,
+    max(timestampdiff(year,mp.date_of_birth,curdate())) AS oldest_age,
+    min(timestampdiff(year,mp.date_of_birth,curdate())) AS youngest_age
+FROM soraya_ai_accuracy.member AS m
+JOIN soraya_ai_accuracy.member_profile AS mp
+ON m.profile_entity_id = mp.entity_id
+GROUP BY 1
+ORDER BY 1

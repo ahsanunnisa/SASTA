@@ -1,0 +1,29 @@
+SELECT
+	o.order_public_id AS order_public_id,
+    date(date_add(o.order_created_time_utc, interval 7 hour)) AS order_created_date_wib,
+    m.phone_number AS member_phone_number,
+    mp.city AS member_city_address,
+    mp.province AS member_province_address,
+    ost.name AS order_status_name,
+    pmt.name AS order_payment_method_name,
+    1000*o.points_used + o.discount AS total_discount,
+    IF(o.total_cart>=250000,
+		o.total_cart - (1000*o.points_used + o.discount),
+        o.total_cart + o.shipping_cost - (1000*o.points_used + o.discount)
+	) AS grand_total
+FROM soraya_ai_accuracy.order AS o
+JOIN soraya_ai_accuracy.member AS m
+ON o.member_entity_id = m.entity_id
+JOIN soraya_ai_accuracy.member_profile AS mp
+ON m.profile_entity_id = mp.entity_id
+JOIN soraya_ai_accuracy.payment_method_type AS pmt
+ON o.payment_method_id = pmt.id
+JOIN soraya_ai_accuracy.order_status_type AS ost
+ON o.status_id = ost.id
+WHERE
+	(mp.province in ('DKI Jakarta', 'Banten', 'Jawa Barat')
+    AND
+    m.is_verified = 1)
+    AND
+    (date(date_add(o.order_created_time_utc, interval 7 hour)) BETWEEN '2019-03-10' AND '2019-03-25')
+ORDER BY 2, 9 DESC
